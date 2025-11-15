@@ -13,6 +13,7 @@ import {
   IsIn,
   IsEmail,
   IsBoolean,
+  ValidationError,
 } from "class-validator";
 import uniq from "lodash/uniq";
 import { languages } from "@shared/i18n";
@@ -30,12 +31,13 @@ import { Public, PublicEnvironmentRegister } from "./utils/decorators/Public";
 export class Environment {
   constructor() {
     process.nextTick(() => {
-      void validate(this).then((errors) => {
+      void validate(this).then((errors: ValidationError[]) => {
         if (errors.length > 0) {
           let output =
             "Environment configuration is invalid, please check the following:\n\n";
           output += errors.map(
-            (error) => "- " + Object.values(error.constraints ?? {}).join(", ")
+            (error: ValidationError) =>
+              "- " + Object.values(error.constraints ?? {}).join(", ")
           );
           console.warn(output);
           process.exit(1);
@@ -318,7 +320,7 @@ export class Environment {
       "collaboration,websockets,worker,web"
     )
       .split(",")
-      .map((service) => service.toLowerCase().trim())
+      .map((service: string) => service.toLowerCase().trim())
   );
 
   /**
